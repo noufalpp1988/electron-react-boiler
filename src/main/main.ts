@@ -14,6 +14,16 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import serverStart from './server/server';
+
+// server configuration
+const startServer = () => {
+  try {
+    serverStart();
+  } catch (err) {
+    console.error('Server Error:', err);
+  }
+};
 
 class AppUpdater {
   constructor() {
@@ -26,9 +36,9 @@ class AppUpdater {
 let mainWindow: BrowserWindow | null = null;
 
 ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
+  const msgTemplate = (pingPong: string) => pingPong;
+  console.log('msgTemplate:', msgTemplate(arg));
+  event.reply('ipc-example', msgTemplate('pong from main'));
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -93,6 +103,8 @@ const createWindow = async () => {
     } else {
       mainWindow.maximize();
       // mainWindow.show();
+      // start the node server for API
+      startServer();
     }
   });
 

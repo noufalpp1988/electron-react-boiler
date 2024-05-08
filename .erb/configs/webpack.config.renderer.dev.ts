@@ -194,13 +194,13 @@ const configuration: webpack.Configuration = {
         .on('close', (code: number) => process.exit(code!))
         .on('error', (spawnError) => console.error(spawnError));
 
-      console.log('Starting Node Server...');
-      const nodeServer = spawn('npm', ['run', 'start:server'], {
-        shell: true,
-        stdio: 'inherit',
-      })
-        .on('close', (code: number) => process.exit(code!))
-        .on('error', (spawnError) => console.error(spawnError));
+      // console.log('Starting Node Server...');
+      // const nodeServer = spawn('npm', ['run', 'start:server'], {
+      //   shell: true,
+      //   stdio: 'inherit',
+      // })
+      //   .on('close', (code: number) => process.exit(code!))
+      //   .on('error', (spawnError) => console.error(spawnError));
 
       console.log('Starting Main Process...');
       let args = ['run', 'start:main'];
@@ -216,7 +216,7 @@ const configuration: webpack.Configuration = {
       })
         .on('close', (code: number) => {
           preloadProcess.kill();
-          nodeServer.kill();
+          // nodeServer.kill();
           process.exit(code!);
         })
         .on('error', (spawnError) => console.error(spawnError));

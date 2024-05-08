@@ -4,9 +4,9 @@ import { Link } from 'react-router-dom';
 function Sample() {
   const [data, setData] = React.useState(null);
 
-  const apiUrl = 'http://localhost:3001';
-
   React.useEffect(() => {
+    const PORT = 3001;
+    const apiUrl = `http://localhost:${PORT}`;
     fetch(`${apiUrl}/api`)
       .then((res) => res.json())
       .then((val) => setData(val.message))
