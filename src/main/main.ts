@@ -35,11 +35,15 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => pingPong;
-  console.log('msgTemplate:', msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong from main'));
-});
+const streamChannel = (msg: string) => {
+  ipcMain.on('ipc-channel-A', async (event, arg) => {
+    const msgTemplate = (pingPong: string) => pingPong;
+    console.log('msgTemplate:', msgTemplate(arg));
+    event.reply('ipc-channel-A', msgTemplate(msg));
+  });
+};
+
+streamChannel('pong from main');
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -110,6 +114,7 @@ const createWindow = async () => {
 
   mainWindow.on('closed', () => {
     mainWindow = null;
+    console.log('mainWindow closed');
   });
 
   const menuBuilder = new MenuBuilder(mainWindow);
@@ -133,9 +138,17 @@ const createWindow = async () => {
 app.on('window-all-closed', () => {
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+
+  console.log('app window closed');
+  // quit the app when the browser is closed.
+  app.quit();
+  // if (process.platform !== 'darwin') {
+  //   app.quit();
+  // }
+});
+
+app.on('quit', () => {
+  console.log('app quit');
 });
 
 app
