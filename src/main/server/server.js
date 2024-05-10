@@ -1,34 +1,27 @@
 /* eslint import/prefer-default-export: off */
+import cors from 'cors';
+import connectDB from './db';
+
 const http = require('http');
 const express = require('express');
 
 const app = express();
+app.use(cors());
 
+const normalizePort = (val) => {
+  const port = parseInt(val, 10);
+
+  if (Number.isNaN(port)) {
+    return val;
+  }
+  if (port >= 0) {
+    return port;
+  }
+  return false;
+};
+
+connectDB();
 const serverStart = () => {
-  app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader(
-      'Access-Control-Allow-Methods',
-      'OPTIONS, GET, POST, PUT, PATCH, DELETE',
-    );
-    res.setHeader(
-      'Access-Control-Allow-Headers',
-      'Content-Type, Authorization',
-    );
-    next();
-  });
-
-  const normalizePort = (val) => {
-    const port = parseInt(val, 10);
-
-    if (Number.isNaN(port)) {
-      return val;
-    }
-    if (port >= 0) {
-      return port;
-    }
-    return false;
-  };
   const port = normalizePort(process.env.PORT || '3001');
   app.set('port', port);
 
@@ -49,9 +42,9 @@ const serverStart = () => {
       case 'EADDRINUSE':
         console.error(`${bind} is already in use. Retrying ...`);
         server.close();
-        setTimeout(() => {
-          server.listen(port);
-        }, 1000);
+        // setTimeout(() => {
+        //   server.listen(port);
+        // }, 1000);
         break;
       default:
         throw error;
