@@ -141,10 +141,15 @@ app.on('window-all-closed', () => {
 
   console.log('app window closed');
   // quit the app when the browser is closed.
-  app.quit();
-  // if (process.platform !== 'darwin') {
-  //   app.quit();
-  // }
+  // app.quit();
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+app.on('before-quit', () => {
+  mainWindow?.removeAllListeners('close');
+  mainWindow?.close();
 });
 
 app.on('quit', () => {

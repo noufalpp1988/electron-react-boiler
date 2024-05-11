@@ -4,9 +4,12 @@ import connectDB from './db';
 
 const http = require('http');
 const express = require('express');
+const router = require('./routes');
 
 const app = express();
 app.use(cors());
+app.use(express.json());
+app.use('/tasks', router);
 
 const normalizePort = (val) => {
   const port = parseInt(val, 10);
