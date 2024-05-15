@@ -4,12 +4,24 @@ import connectDB from './db';
 
 const http = require('http');
 const express = require('express');
-const router = require('./routes');
+const cookieParser = require('cookie-parser');
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: ['http://localhost:3001', 'http://localhost:1212'],
+    method: ['GET","POST","DELETE","PUT","PATCH'],
+    credentials: true,
+  }),
+);
+
+const router = require('./routes/routes');
+const AuthRoutes = require('./routes/AuthRoutes');
+
+app.use(cookieParser());
 app.use(express.json());
 
+app.use('/', AuthRoutes);
 app.use('/tasks', router);
 
 const normalizePort = (val) => {
@@ -25,6 +37,7 @@ const normalizePort = (val) => {
 };
 
 connectDB();
+
 const serverStart = () => {
   const port = normalizePort(process.env.PORT || '3001');
   app.set('port', port);

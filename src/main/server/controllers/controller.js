@@ -1,10 +1,10 @@
-const Task = require('./model');
+const { TaskModel } = require('../models/model');
 
 exports.createTask = async (req, res) => {
   try {
     const taskData = await req.body;
 
-    await Task.create(taskData)
+    await TaskModel.create(taskData)
       .then((createdTask) => {
         if (!createdTask) {
           res.status(404).json({
@@ -13,7 +13,6 @@ exports.createTask = async (req, res) => {
             error: 'Unable get created task',
           });
         }
-        console.log(req.body);
         return res.status(201).json({
           success: true,
           createdTask,
@@ -28,14 +27,14 @@ exports.createTask = async (req, res) => {
   } catch (ex) {
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: `Internal server error:${ex}`,
     });
   }
 };
 
 exports.getTasks = async (req, res) => {
   try {
-    Task.find()
+    TaskModel.find()
       .then((allTasks) => {
         return res.status(200).json({
           success: true,
@@ -49,11 +48,11 @@ exports.getTasks = async (req, res) => {
           error,
         });
       });
-  } catch (error) {
+  } catch (ex) {
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
-      error: error.message,
+      message: `Internal server error:${ex}`,
+      error: ex.message,
     });
   }
 };
