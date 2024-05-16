@@ -1,7 +1,7 @@
-import { register, login } from '../controllers/AuthControllers';
-import { checkUser } from '../middlewares/AuthMiddleware';
-
 const AuthRouter = require('express').Router();
+const { checkUser } = require('../middlewares/AuthMiddleware');
+
+const { register, login } = require('../controllers/AuthControllers');
 
 AuthRouter.post('/', checkUser);
 AuthRouter.post('/register', register);
