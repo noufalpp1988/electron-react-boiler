@@ -1,5 +1,5 @@
 const router = require('express').Router();
 const controller = require('../controllers/controller');
 
-router.post('/', controller.createTask).get('/', controller.getTasks);
+router.post('/task', controller.createTask).get('/task', controller.getTasks);
 module.exports = router;

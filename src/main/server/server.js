@@ -21,6 +21,13 @@ const AuthRoutes = require('./routes/AuthRoutes');
 app.use(cookieParser());
 app.use(express.json());
 
+const requestTime = function (req, res, next) {
+  req.requestTime = Date.now();
+  next();
+};
+
+app.use(requestTime);
+
 app.use('/', AuthRoutes);
 app.use('/tasks', router);
 
@@ -69,7 +76,8 @@ const serverStart = () => {
   });
 
   app.get('/api', (req, res) => {
-    res.json({ message: 'This is response from server!' });
+    const responseText = `Welcome to Store App [ Time: ${req.requestTime}]`;
+    res.send({ message: responseText });
   });
 
   server.on('listening', () => {
