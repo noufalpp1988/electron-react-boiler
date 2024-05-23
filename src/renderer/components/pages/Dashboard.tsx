@@ -5,14 +5,26 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import icon from '../../../../assets/icon.svg';
 
-export default function Secret() {
+// calling IPC exposed from preload script
+let authToken: unknown;
+(async function () {
+  authToken = await window.commonHandler.getAuthToken([]);
+  console.log('IPC:AuthToken:', authToken);
+})();
+
+export default function Dashboard() {
   const navigate = useNavigate();
 
-  const [cookies, setCookie, removeCookie] = useCookies(['jwt']);
+  const [cookies, setCookie, removeCookie] = useCookies();
+
+  if (!authToken || authToken !== '') {
+    setCookie('jwt', authToken);
+  }
 
   useEffect(() => {
     const verifyUser = async () => {
-      if (!cookies.jwt) {
+      if (!cookies.jwt && !authToken) {
+        console.log('no cookei');
         navigate('/login');
       } else {
         const { data } = await axios.post(

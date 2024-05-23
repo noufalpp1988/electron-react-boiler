@@ -39,6 +39,8 @@ module.exports.register = async (req, res, next) => {
       withCredentials: true,
       httpOnly: false,
       maxAge: maxAge * 1000,
+      sameSite: 'none',
+      secure: true,
     });
 
     res.status(201).json({
@@ -62,6 +64,8 @@ module.exports.login = async (req, res, next) => {
       withCredentials: true,
       httpOnly: false,
       maxAge: maxAge * 1000,
+      sameSite: 'none',
+      secure: true,
     });
 
     res.status(200).json({

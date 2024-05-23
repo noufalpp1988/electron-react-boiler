@@ -9,7 +9,14 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  shell,
+  ipcMain,
+  globalShortcut,
+  session,
+} from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -35,15 +42,19 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-const streamChannel = (msg: string) => {
+const streamChannel = (channel: string, msg: string) => {
   ipcMain.on('ipc-channel-A', async (event, arg) => {
-    const msgTemplate = (pingPong: string) => pingPong;
+    const msgTemplate = (message: string) => message;
     console.log('msgTemplate:', msgTemplate(arg));
-    event.reply('ipc-channel-A', msgTemplate(msg));
+    event.reply(channel, msgTemplate(msg));
+    // if (msgTemplate(arg).includes('reload')) {
+    //   console.log('reloading');
+    //   mainWindow?.reload();
+    // }
   });
 };
 
-streamChannel('pong from main');
+streamChannel('ipc-channel-A', 'Hello from main');
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -107,8 +118,6 @@ const createWindow = async () => {
     } else {
       mainWindow.maximize();
       // mainWindow.show();
-      // start the node server for API
-      startServer();
     }
   });
 
@@ -124,6 +133,10 @@ const createWindow = async () => {
   mainWindow.webContents.setWindowOpenHandler((edata) => {
     shell.openExternal(edata.url);
     return { action: 'deny' };
+  });
+
+  globalShortcut.register('f5', function () {
+    console.log('f5 is pressed');
   });
 
   // Remove this if your app does not use auto updates
@@ -156,10 +169,67 @@ app.on('quit', () => {
   console.log('app quit');
 });
 
+// let devtools = null;
+
 app
   .whenReady()
   .then(() => {
     createWindow();
+    // start the node server for API
+    startServer();
+
+    // Query all cookies.
+    session.defaultSession.cookies
+      .get({})
+      .then((cookies) => {
+        console.log(cookies);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+    const cookie1 = {
+      url: 'http://localhost:3001',
+      name: 'testCookie',
+      value: 'test',
+      secure: true,
+      httpOnly: false,
+      sameSite: 'no_restriction',
+    };
+
+    session.defaultSession.cookies
+      .set(cookie1)
+      .then(
+        () => {
+          console.log('Cookie set:', cookie1.name);
+        },
+        (error) => {
+          console.error(error);
+        },
+      )
+      .catch((ex) => {
+        console.error(ex);
+      });
+
+    session.defaultSession.cookies
+      .get({ url: 'http://localhost:3001' })
+      .then((cookies: any) => {
+        console.log('found-cookies:3001:', cookies);
+        ipcMain.handle('channel-auth', async (event, arg) => {
+          // do stuff
+          console.log('from Rndr:', arg);
+          // await awaitableProcess();
+          return cookies[0].value;
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+    // // To open the devtools by default
+    // devtools = new BrowserWindow();
+    // mainWindow?.webContents.setDevToolsWebContents(devtools.webContents);
+    // mainWindow?.webContents.openDevTools({ mode: 'detach' });
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
