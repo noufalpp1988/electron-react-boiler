@@ -6,18 +6,18 @@ import { ToastContainer, toast } from 'react-toastify';
 import icon from '../../../../assets/icon.svg';
 
 // calling IPC exposed from preload script
-let authToken: unknown;
-(async function () {
-  authToken = await window.commonHandler.getAuthToken([]);
-  console.log('IPC:AuthToken:', authToken);
-})();
+const authToken = async () => {
+  const value = await window.commonHandler.getAuthToken([]);
+  return value;
+};
 
 export default function Dashboard() {
   const navigate = useNavigate();
 
   const [cookies, setCookie, removeCookie] = useCookies();
 
-  if (!authToken || authToken !== '') {
+  if (!authToken) {
+    console.log('IPC:AuthToken:', authToken);
     setCookie('jwt', authToken);
   }
 
@@ -41,9 +41,14 @@ export default function Dashboard() {
     verifyUser();
   }, [cookies, navigate, setCookie, removeCookie]);
 
-  const logout = () => {
+  const logout = async () => {
+    console.log(
+      'initiate logout..',
+      await window.commonHandler.getAuthToken([]),
+    );
     removeCookie('jwt');
-    navigate('/login');
+    if ((await window.commonHandler.getAuthToken(['logout'])).length === 0)
+      navigate('/login');
   };
 
   return (

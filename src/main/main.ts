@@ -23,6 +23,27 @@ import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import serverStart from './server/server';
 
+interface getCookieInterface {
+  name: string;
+  value: string;
+  domain: string;
+  hostOnly: boolean;
+  path: string;
+  secure: boolean;
+  httpOnly: boolean;
+  session: boolean;
+  expirationDate: number;
+  sameSite: string;
+}
+
+interface setCookieInterface {
+  url: string;
+  name: string;
+  value: string;
+  secure: boolean;
+  httpOnly: boolean;
+  sameSite: string;
+}
 // server configuration
 const startServer = () => {
   try {
@@ -55,6 +76,28 @@ const streamChannel = (channel: string, msg: string) => {
 };
 
 streamChannel('ipc-channel-A', 'Hello from main');
+
+ipcMain.handle('channel-auth', async (event, arg) => {
+  console.log('from Rndr:', arg);
+  let cookiesArr: never[] = [];
+  if (!arg.includes('logout')) {
+    await session.defaultSession.cookies
+      .get({ url: 'http://localhost:3001' })
+      .then((cookies: any) => {
+        console.log('found-cookies:3001:', cookies);
+        cookiesArr = cookies;
+      })
+      .catch((error) => {
+        console.log(error);
+        cookiesArr = [];
+      });
+  } else {
+    await session.defaultSession.cookies.remove('http://localhost:3001', 'jwt');
+    cookiesArr = [];
+  }
+  console.log('cookiesArr-arg:', cookiesArr, arg);
+  return cookiesArr;
+});
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -181,14 +224,14 @@ app
     // Query all cookies.
     session.defaultSession.cookies
       .get({})
-      .then((cookies) => {
-        console.log(cookies);
+      .then((cookies: any) => {
+        console.log('main cookies:', cookies);
       })
       .catch((error) => {
         console.log(error);
       });
 
-    const cookie1 = {
+    const cookie1: setCookieInterface = {
       url: 'http://localhost:3001',
       name: 'testCookie',
       value: 'test',
@@ -209,21 +252,6 @@ app
       )
       .catch((ex) => {
         console.error(ex);
-      });
-
-    session.defaultSession.cookies
-      .get({ url: 'http://localhost:3001' })
-      .then((cookies: any) => {
-        console.log('found-cookies:3001:', cookies);
-        ipcMain.handle('channel-auth', async (event, arg) => {
-          // do stuff
-          console.log('from Rndr:', arg);
-          // await awaitableProcess();
-          return cookies[0].value;
-        });
-      })
-      .catch((error) => {
-        console.log(error);
       });
 
     // // To open the devtools by default

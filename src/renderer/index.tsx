@@ -19,6 +19,6 @@ root.render(<App />);
     await window.electron.ipcRenderer.node_process(),
   );
 
-  const response = await window.commonHandler.getAuthToken([1, 2, 3]);
+  const response = await window.commonHandler.getAuthToken([]);
   console.log('IPC:commonHandler :', response);
 })();
