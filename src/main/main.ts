@@ -277,29 +277,6 @@ app
         console.log(error);
       });
 
-    const cookie1: setCookieInterface = {
-      url: 'http://localhost:3001',
-      name: 'testCookie',
-      value: 'test',
-      secure: true,
-      httpOnly: false,
-      sameSite: 'no_restriction',
-    };
-
-    session.defaultSession.cookies
-      .set(cookie1)
-      .then(
-        () => {
-          console.log('Cookie set:', cookie1.name);
-        },
-        (error) => {
-          console.error(error);
-        },
-      )
-      .catch((ex) => {
-        console.error(ex);
-      });
-
     // // To open the devtools by default
     // devtools = new BrowserWindow();
     // mainWindow?.webContents.setDevToolsWebContents(devtools.webContents);
