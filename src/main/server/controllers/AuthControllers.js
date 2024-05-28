@@ -42,6 +42,13 @@ module.exports.register = async (req, res, next) => {
       sameSite: 'none',
       secure: true,
     });
+    res.cookie('isFirstLogin', 'true', {
+      withCredentials: true,
+      httpOnly: false,
+      maxAge: maxAge * 1000,
+      sameSite: 'none',
+      secure: true,
+    });
 
     res.status(201).json({
       user: user._id,
@@ -61,6 +68,13 @@ module.exports.login = async (req, res, next) => {
     const token = createToken(user._id);
 
     res.cookie('jwt', token, {
+      withCredentials: true,
+      httpOnly: false,
+      maxAge: maxAge * 1000,
+      sameSite: 'none',
+      secure: true,
+    });
+    res.cookie('isFirstLogin', 'true', {
       withCredentials: true,
       httpOnly: false,
       maxAge: maxAge * 1000,

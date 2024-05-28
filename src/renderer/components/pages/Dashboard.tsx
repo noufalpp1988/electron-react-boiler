@@ -1,53 +1,53 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCookies } from 'react-cookie';
+// import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import icon from '../../../../assets/icon.svg';
 
 // calling IPC exposed from preload script
-const authToken = async () => {
-  const value = await window.commonHandler.getAuthToken([]);
-  return value;
-};
 
 export default function Dashboard() {
   const navigate = useNavigate();
 
-  const [cookies, setCookie, removeCookie] = useCookies();
+  // const [cookies, setCookie, removeCookie] = useCookies();
 
-  if (!authToken) {
-    console.log('IPC:AuthToken:', authToken);
-    setCookie('jwt', authToken);
-  }
-
-  useEffect(() => {
-    const verifyUser = async () => {
-      if (!cookies.jwt && !authToken) {
-        console.log('no cookei');
-        navigate('/login');
-      } else {
+  const verifyUser = useCallback(async () => {
+    const cookieMain = await window.commonHandler.getCookie([]);
+    if (cookieMain.length !== 0) {
+      console.log('found main cookei:', cookieMain);
+      if (cookieMain.some((c: any) => c.name === 'jwt')) {
+        const jwtCookie = cookieMain.filter((c: any) => c.name === 'jwt')[0]
+          ?.value;
+        await window.commonHandler.getCookie(['loggedin']);
+        const isFirstLoginCookie = cookieMain.filter(
+          (c: any) => c.name === 'isFirstLogin',
+        )[0]?.value;
+        console.log('found jwt cookei:', jwtCookie, isFirstLoginCookie);
         const { data } = await axios.post(
           'http://localhost:3001',
           {},
           { withCredentials: true },
         );
-        if (!data.status) {
-          removeCookie('jwt');
-          navigate('/login');
-        } else toast(`HI ${data.user}`, { theme: 'dark' });
+        isFirstLoginCookie === 'true'
+          ? toast(`HI ${data?.user}`, { theme: 'dark' })
+          : null;
+      } else {
+        console.log('not found jwt cookei');
+        navigate('/login');
       }
-    };
+    } else {
+      console.log('no main cookei');
+    }
+  }, [navigate]);
+
+  useEffect(() => {
     verifyUser();
-  }, [cookies, navigate, setCookie, removeCookie]);
+  }, [verifyUser]);
 
   const logout = async () => {
-    console.log(
-      'initiate logout..',
-      await window.commonHandler.getAuthToken([]),
-    );
-    removeCookie('jwt');
-    if ((await window.commonHandler.getAuthToken(['logout'])).length === 0)
+    console.log('initiate logout..', await window.commonHandler.getCookie([]));
+    if ((await window.commonHandler.getCookie(['logout'])).length === 0)
       navigate('/login');
   };
 

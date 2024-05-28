@@ -28,7 +28,7 @@ const electronHandler = {
 };
 
 const commonHandler = {
-  getAuthToken: (arg: any) => ipcRenderer.invoke('channel-auth', arg),
+  getCookie: (arg: any) => ipcRenderer.invoke('channel-auth', arg),
   myPromises: [Promise.resolve(), Promise.reject(new Error('whoops'))],
   anAsyncFunction: async () => 123,
   data: {

@@ -80,7 +80,45 @@ streamChannel('ipc-channel-A', 'Hello from main');
 ipcMain.handle('channel-auth', async (event, arg) => {
   console.log('from Rndr:', arg);
   let cookiesArr: never[] = [];
-  if (!arg.includes('logout')) {
+  const cookie: setCookieInterface = {
+    url: 'http://localhost:3001',
+    name: 'isFirstLogin',
+    value: 'false',
+    secure: true,
+    httpOnly: false,
+    sameSite: 'no_restriction',
+  };
+  if (arg.includes('logout')) {
+    await session.defaultSession.cookies.remove('http://localhost:3001', 'jwt');
+    session.defaultSession.cookies
+      .set(cookie)
+      .then(
+        () => {
+          console.log('Cookie set:', cookie.name);
+        },
+        (error) => {
+          console.error(error);
+        },
+      )
+      .catch((ex) => {
+        console.error(ex);
+      });
+    cookiesArr = [];
+  } else if (arg.includes('loggedin')) {
+    console.log('loggedin');
+    session.defaultSession.cookies
+      .set(cookie)
+      .then(
+        () => {
+          console.log('Cookie set:', cookie.name);
+        },
+        (error) => {
+          console.error(error);
+        },
+      )
+      .catch((ex) => {
+        console.error(ex);
+      });
     await session.defaultSession.cookies
       .get({ url: 'http://localhost:3001' })
       .then((cookies: any) => {
@@ -92,8 +130,16 @@ ipcMain.handle('channel-auth', async (event, arg) => {
         cookiesArr = [];
       });
   } else {
-    await session.defaultSession.cookies.remove('http://localhost:3001', 'jwt');
-    cookiesArr = [];
+    await session.defaultSession.cookies
+      .get({ url: 'http://localhost:3001' })
+      .then((cookies: any) => {
+        console.log('found-cookies:3001:', cookies);
+        cookiesArr = cookies;
+      })
+      .catch((error) => {
+        console.log(error);
+        cookiesArr = [];
+      });
   }
   console.log('cookiesArr-arg:', cookiesArr, arg);
   return cookiesArr;
