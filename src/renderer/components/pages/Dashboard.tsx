@@ -45,12 +45,6 @@ export default function Dashboard() {
     verifyUser();
   }, [verifyUser]);
 
-  const logout = async () => {
-    console.log('initiate logout..', await window.commonHandler.getCookie([]));
-    if ((await window.commonHandler.getCookie(['logout'])).length === 0)
-      navigate('/login');
-  };
-
   return (
     <>
       DASHBOARD
@@ -60,9 +54,6 @@ export default function Dashboard() {
         </div>
         <div className="App">
           <Link to="/"> Home </Link>
-          <button type="button" onClick={logout}>
-            Log Out
-          </button>
         </div>
       </div>
       <ToastContainer />

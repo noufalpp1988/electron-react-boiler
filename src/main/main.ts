@@ -224,7 +224,7 @@ const createWindow = async () => {
     return { action: 'deny' };
   });
 
-  globalShortcut.register('f5', function () {
+  globalShortcut.register('f5', () => {
     console.log('f5 is pressed');
   });
 
